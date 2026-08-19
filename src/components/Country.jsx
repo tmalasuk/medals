@@ -11,4 +11,4 @@ function Country() {
     return <div>{name}: {int}<button onClick={handleClick}> + give medal </button></div>;
 }
 
-export default Country;1
+export default Country;
