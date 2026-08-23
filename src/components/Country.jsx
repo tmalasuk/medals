@@ -1,14 +1,6 @@
-import React, { useState } from 'react';
 
-function Country() {
-    var [int, setInt] = useState(0);
-    var [name, setName] = useState('United States')
+export default function Country(props) {
 
-    function handleClick() {
-    setInt(int + 1)
-  }
-
-    return <div>{name}: {int}<button onClick={handleClick}> + give medal </button></div>;
+    return <div>{props.name}: {props.gold}<button onClick={()=> props.onDelete(props.id)}> - delete </button></div>;
 }
 
-export default Country;

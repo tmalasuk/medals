@@ -6,11 +6,22 @@ import Country from './components/Country'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [countries, setCountries] = useState([
+    { id: 1, name: 'United States', gold: 2 },
+    { id: 2, name: 'China', gold: 3 },
+    { id: 3, name: 'France', gold: 0 },
+  ])
+
+  function handleDelete(countryID) {
+    setCountries(countries.filter((c) => c.id !== countryID));
+  }
+
 
   return (
     <>
-      <h1><Country/></h1>
+      {countries.map((country) => (
+        <Country key={country.id} id={country.id} name={country.name} gold={country.gold} onDelete={handleDelete} />
+      ))}
     </>
   )
 }
