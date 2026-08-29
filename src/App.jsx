@@ -8,10 +8,11 @@ import './App.css'
 
 function App() {
   const [countries, setCountries] = useState([
-    { id: 1, name: 'United States', gold: 2 },
-    { id: 2, name: 'China', gold: 3 },
-    { id: 3, name: 'France', gold: 0 },
-  ])
+    { id: 1, name: "United States", gold: 2, silver: 2, bronze: 3 },
+    { id: 2, name: "China", gold: 3, silver: 1, bronze: 0 },
+    { id: 3, name: "France", gold: 0, silver: 2, bronze: 2 },
+  ]);
+
 
   const medals = useRef([
     { id: 1, name: "gold" },
@@ -23,12 +24,41 @@ function App() {
     setCountries(countries.filter((c) => c.id !== countryID));
   }
 
+  function decrease(countryID, medal){
+    const countriesMutable = [...countries];
+
+    const idx = countriesMutable.findIndex((c) => countryID == c.id);
+    const medalNum = countriesMutable[idx][medal] -= 1;
+
+    setCountries(countriesMutable);
+  }
+
+  function increase(countryID, medal){
+    const countriesMutable = [...countries];
+
+    const idx = countriesMutable.findIndex((c) => countryID == c.id);
+    const medalNum = countriesMutable[idx][medal] += 1;
+
+    setCountries(countriesMutable);
+  }
+
+  function allMedal(){
+    const goldCount = countries.reduce((a, b) => a + b.gold, 0);
+    const silverCount = countries.reduce((a, b) => a + b.silver, 0);
+    const bronzeCount = countries.reduce((a, b) => a + b.bronze, 0);
+
+    return goldCount + silverCount + bronzeCount;
+  }
+
 
   return (
-    <div class="countries">
-      {countries.map((country) => (
-        <Country key={country.id} id={country.id} name={country.name} gold={country.gold} onDelete={handleDelete} medals={medals.current}/>
-      ))}
+    <div>
+      <h1>Olympic Medals: {allMedal()}</h1>
+      <div className="countries">
+        {countries.map((country) => (
+          <Country key={country.id} id={country.id} name={country.name} onDelete={handleDelete} medals={medals.current} country={country} onDecrease={decrease} onIncrease={increase} />
+        ))}
+      </div>
     </div>
   )
 }
