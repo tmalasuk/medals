@@ -28,7 +28,10 @@ function App() {
     const countriesMutable = [...countries];
 
     const idx = countriesMutable.findIndex((c) => countryID == c.id);
-    const medalNum = countriesMutable[idx][medal] -= 1;
+
+    if (countriesMutable[idx][medal] <= 0) return;
+
+    countriesMutable[idx][medal] -= 1;
 
     setCountries(countriesMutable);
   }
