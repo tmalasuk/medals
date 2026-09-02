@@ -13,6 +13,10 @@ function App() {
     { id: 3, name: "France", gold: 0, silver: 2, bronze: 2 },
   ]);
 
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const [newCountryName, setNewCountryName] = useState("");
+  const nextId = useRef(4);
+
 
   const medals = useRef([
     { id: 1, name: "gold" },
@@ -53,6 +57,18 @@ function App() {
     return goldCount + silverCount + bronzeCount;
   }
 
+  function addCountry(e) {
+    e.preventDefault();
+    if (!newCountryName.trim()) return;
+
+    setCountries([
+      ...countries,
+      { id: nextId.current, name: newCountryName, gold: 0, silver: 0, bronze: 0 },
+    ]);
+    nextId.current += 1;
+    setNewCountryName("");
+    setShowAddMenu(false);
+  }
 
   return (
     <div>
@@ -61,6 +77,22 @@ function App() {
         {countries.map((country) => (
           <Country key={country.id} id={country.id} name={country.name} onDelete={handleDelete} medals={medals.current} country={country} onDecrease={decrease} onIncrease={increase} />
         ))}
+      </div>
+
+      <div>
+        <button onClick={() => setShowAddMenu(!showAddMenu)}>+ Add Country</button>
+        {showAddMenu && (
+          <form onSubmit={addCountry}>
+            <input
+              type="text"
+              value={newCountryName}
+              onChange={(e) => setNewCountryName(e.target.value)}
+              placeholder="Country name"
+              autoFocus
+            />
+            <button type="submit">Add</button>
+          </form>
+        )}
       </div>
     </div>
   )
