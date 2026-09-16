@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Country from "./components/Country";
 import {
   Theme,
@@ -13,50 +13,30 @@ import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
 import "@radix-ui/themes/styles.css";
 import "./App.css";
 import NewCountry from "./components/NewCountry";
+import { getCountries, addCountry, deleteCountry } from "./api";
 
 function App() {
   const [appearance, setAppearance] = useState("dark");
-  const [countries, setCountries] = useState([
-    { id: 1, name: "United States", gold: 2, silver: 2, bronze: 3 },
-    { id: 2, name: "China", gold: 3, silver: 1, bronze: 0 },
-    { id: 3, name: "France", gold: 0, silver: 2, bronze: 2 },
-    { id: 4, name: "Germany", gold: 0, silver: 2, bronze: 2 },
-    { id: 5, name: "Spain", gold: 1, silver: 1, bronze: 0 },
-    { id: 6, name: "United Kingdom", gold: 0, silver: 2, bronze: 3 },
-    { id: 7, name: "Brazil", gold: 3, silver: 0, bronze: 0 },
-    { id: 8, name: "Italy", gold: 2, silver: 2, bronze: 2 },
-    { id: 9, name: "Switzerland", gold: 1, silver: 1, bronze: 2 },
-    { id: 10, name: "Poland", gold: 0, silver: 2, bronze: 1 },
-    { id: 11, name: "Sweden", gold: 0, silver: 3, bronze: 1 },
-    { id: 12, name: "Ireland", gold: 2, silver: 1, bronze: 0 },
-    { id: 13, name: "Scotland", gold: 3, silver: 0, bronze: 2 },
-  ]);
+  const [countries, setCountries] = useState([]);
   const medals = useRef([
     { id: 1, name: "gold", color: "#FFD700" },
     { id: 2, name: "silver", color: "#C0C0C0" },
     { id: 3, name: "bronze", color: "#CD7F32" },
   ]);
 
+  useEffect(() => {
+    getCountries().then(setCountries);
+  }, []);
+
   function toggleAppearance() {
     setAppearance(appearance === "light" ? "dark" : "light");
   }
-  function handleAdd(name) {
-    console.log(`add country: ${name}`);
-    setCountries(
-      [...countries].concat({
-        id:
-          countries.length === 0
-            ? 1
-            : Math.max(...countries.map((country) => country.id)) + 1,
-        name: name,
-        gold: 0,
-        silver: 0,
-        bronze: 0,
-      })
-    );
+  async function handleAdd(name) {
+    const newCountry = await addCountry(name);
+    setCountries([...countries, newCountry]);
   }
-  function handleDelete(id) {
-    console.log(`delete country: ${id}`);
+  async function handleDelete(id) {
+    await deleteCountry(id);
     setCountries(countries.filter((c) => c.id !== id));
   }
   function handleIncrement(countryId, medalName) {

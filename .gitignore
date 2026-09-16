@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# .NET
+MedalsApi/bin/
+MedalsApi/obj/
+MedalsApi/*.db
+MedalsApi/*.db-shm
+MedalsApi/*.db-wal
+MedalsApi/appsettings.Development.json.user
+MedalsApi/publish/
+MedalsApi/*.zip
