@@ -1,101 +1,99 @@
-import { useState } from 'react'
-import { useRef } from "react";
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import Country from './components/Country'
-import './App.css'
+import { useState, useRef, useEffect } from "react";
+import Country from "./components/Country";
+import {
+  Theme,
+  Button,
+  Flex,
+  Heading,
+  Badge,
+  Container,
+  Grid,
+} from "@radix-ui/themes";
+import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
+import "@radix-ui/themes/styles.css";
+import "./App.css";
+import NewCountry from "./components/NewCountry";
+import { getCountries, addCountry, deleteCountry } from "./api";
 
 function App() {
-  const [countries, setCountries] = useState([
-    { id: 1, name: "United States", gold: 2, silver: 2, bronze: 3 },
-    { id: 2, name: "China", gold: 3, silver: 1, bronze: 0 },
-    { id: 3, name: "France", gold: 0, silver: 2, bronze: 2 },
-  ]);
-
-  const [showAddMenu, setShowAddMenu] = useState(false);
-  const [newCountryName, setNewCountryName] = useState("");
-  const nextId = useRef(4);
-
-
+  const [appearance, setAppearance] = useState("dark");
+  const [countries, setCountries] = useState([]);
   const medals = useRef([
-    { id: 1, name: "gold" },
-    { id: 2, name: "silver" },
-    { id: 3, name: "bronze" },
+    { id: 1, name: "gold", color: "#FFD700" },
+    { id: 2, name: "silver", color: "#C0C0C0" },
+    { id: 3, name: "bronze", color: "#CD7F32" },
   ]);
 
-  function handleDelete(countryID) {
-    setCountries(countries.filter((c) => c.id !== countryID));
+  useEffect(() => {
+    getCountries().then(setCountries);
+  }, []);
+
+  function toggleAppearance() {
+    setAppearance(appearance === "light" ? "dark" : "light");
   }
-
-  function decrease(countryID, medal){
-    const countriesMutable = [...countries];
-
-    const idx = countriesMutable.findIndex((c) => countryID == c.id);
-
-    if (countriesMutable[idx][medal] <= 0) return;
-
-    countriesMutable[idx][medal] -= 1;
-
-    setCountries(countriesMutable);
+  async function handleAdd(name) {
+    const newCountry = await addCountry(name);
+    setCountries([...countries, newCountry]);
   }
-
-  function increase(countryID, medal){
-    const countriesMutable = [...countries];
-
-    const idx = countriesMutable.findIndex((c) => countryID == c.id);
-    const medalNum = countriesMutable[idx][medal] += 1;
-
-    setCountries(countriesMutable);
+  async function handleDelete(id) {
+    await deleteCountry(id);
+    setCountries(countries.filter((c) => c.id !== id));
   }
-
-  function allMedal(){
-    const goldCount = countries.reduce((a, b) => a + b.gold, 0);
-    const silverCount = countries.reduce((a, b) => a + b.silver, 0);
-    const bronzeCount = countries.reduce((a, b) => a + b.bronze, 0);
-
-    return goldCount + silverCount + bronzeCount;
+  function handleIncrement(countryId, medalName) {
+    const idx = countries.findIndex((c) => c.id === countryId);
+    const mutableCountries = [...countries];
+    mutableCountries[idx][medalName] += 1;
+    setCountries(mutableCountries);
   }
-
-  function addCountry(e) {
-    e.preventDefault();
-    if (!newCountryName.trim()) return;
-
-    setCountries([
-      ...countries,
-      { id: nextId.current, name: newCountryName, gold: 0, silver: 0, bronze: 0 },
-    ]);
-    nextId.current += 1;
-    setNewCountryName("");
-    setShowAddMenu(false);
+  function handleDecrement(countryId, medalName) {
+    const idx = countries.findIndex((c) => c.id === countryId);
+    const mutableCountries = [...countries];
+    mutableCountries[idx][medalName] -= 1;
+    setCountries(mutableCountries);
+  }
+  function getAllMedalsTotal() {
+    let sum = 0;
+    medals.current.forEach((medal) => {
+      sum += countries.reduce((a, b) => a + b[medal.name], 0);
+    });
+    return sum;
   }
 
   return (
-    <div>
-      <h1>Olympic Medals: {allMedal()}</h1>
-      <div className="countries">
-        {countries.map((country) => (
-          <Country key={country.id} id={country.id} name={country.name} onDelete={handleDelete} medals={medals.current} country={country} onDecrease={decrease} onIncrease={increase} />
-        ))}
-      </div>
-
-      <div>
-        <button onClick={() => setShowAddMenu(!showAddMenu)}>+ Add Country</button>
-        {showAddMenu && (
-          <form onSubmit={addCountry}>
-            <input
-              type="text"
-              value={newCountryName}
-              onChange={(e) => setNewCountryName(e.target.value)}
-              placeholder="Country name"
-              autoFocus
+    <Theme appearance={appearance}>
+      <Button
+        onClick={toggleAppearance}
+        style={{ position: "fixed", bottom: 20, right: 20, zIndex: 100 }}
+        variant="ghost"
+      >
+        {appearance === "dark" ? <MoonIcon /> : <SunIcon />}
+      </Button>
+      <Flex p="2" pl="8" className="fixedHeader" justify="between">
+        <Heading size="6">
+          Olympic Medals
+          <Badge variant="outline" ml="2">
+            <Heading size="6">{getAllMedalsTotal()}</Heading>
+          </Badge>
+        </Heading>
+        <NewCountry onAdd={handleAdd} />
+      </Flex>
+      <Container className="bg"></Container>
+      <Grid pt="2" gap="2" className="grid-container">
+        {countries
+          .sort((a, b) => a.name.localeCompare(b.name))
+          .map((country) => (
+            <Country
+              key={country.id}
+              country={country}
+              medals={medals.current}
+              onDelete={handleDelete}
+              onIncrement={handleIncrement}
+              onDecrement={handleDecrement}
             />
-            <button type="submit">Add</button>
-          </form>
-        )}
-      </div>
-    </div>
-  )
+          ))}
+      </Grid>
+    </Theme>
+  );
 }
 
-export default App
+export default App;
